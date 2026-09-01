@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proving Ground — Newton's Third Law: Equal and Opposite</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          asphalt: '#15140f', panel: '#1d1b15', panel2: '#242116', line: '#37341f',
+          hazard: '#f4b72a', danger: '#e8564d', safe: '#3fae6a', chalk: '#f4f2ec',
+        },
+        fontFamily: {
+          display: ['"Big Shoulders Display"', 'sans-serif'],
+          sans: ['"IBM Plex Sans"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+          mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace'],
+        },
+      }
+    }
+  }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800;900&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{ --asphalt:#15140f; --panel:#1d1b15; --panel2:#242116; --line:#37341f; --hazard:#f4b72a; --danger:#e8564d; --safe:#3fae6a; --chalk:#f4f2ec; }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--asphalt); font-feature-settings:"tnum" 1;}
+  ::selection{ background:var(--hazard); color:var(--asphalt); }
+  :focus-visible{ outline:2px solid var(--hazard); outline-offset:2px; }
+
+  .grain{ background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"); opacity:.035; }
+  .hazard-stripes{ background-image:repeating-linear-gradient(135deg, var(--hazard) 0 14px, #1a1810 14px 28px); }
+
+  input[type=range]{ -webkit-appearance:none; appearance:none; width:100%; height:6px; border-radius:999px; background:var(--line); outline:none; }
+  input[type=range]::-webkit-slider-runnable-track{ height:6px; border-radius:999px; background:linear-gradient(to right, var(--hazard) 0 var(--fill,50%), var(--line) var(--fill,50%) 100%); }
+  input[type=range]::-moz-range-track{ height:6px; border-radius:999px; background:var(--line); }
+  input[type=range]::-moz-range-progress{ height:6px; border-radius:999px; background:var(--hazard); }
+  input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; appearance:none; margin-top:-7px; width:20px; height:20px; border-radius:50%; background:var(--chalk); border:3px solid var(--hazard); cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.5); transition:transform .12s ease; }
+  input[type=range]::-webkit-slider-thumb:hover{ transform:scale(1.1); }
+  input[type=range]::-moz-range-thumb{ width:20px; height:20px; border-radius:50%; background:var(--chalk); border:3px solid var(--hazard); cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.5); }
+  input[type=range].danger-thumb::-webkit-slider-thumb{ border-color:var(--danger); }
+  input[type=range].danger-thumb::-moz-range-thumb{ border-color:var(--danger); }
+  input[type=range].danger-thumb::-webkit-slider-runnable-track{ background:linear-gradient(to right, var(--danger) 0 var(--fill,50%), var(--line) var(--fill,50%) 100%); }
+  input[type=range]:disabled{ opacity:.35; cursor:not-allowed; }
+  input[type=range]:focus-visible::-webkit-slider-thumb{ outline:2px solid var(--hazard); outline-offset:3px; }
+
+  .chk{ display:inline-flex; align-items:center; gap:7px; cursor:pointer; user-select:none; }
+  .chk input{ position:absolute; opacity:0; width:1px; height:1px; }
+  .chk .box{ width:17px; height:17px; border-radius:5px; border:2px solid var(--line); background:var(--panel2); display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:background .12s,border-color .12s; }
+  .chk input:checked + .box{ background:var(--hazard); border-color:var(--hazard); }
+  .chk input:checked + .box svg{ opacity:1; transform:scale(1); }
+  .chk .box svg{ opacity:0; transform:scale(.5); transition:transform .12s,opacity .12s; width:11px; height:11px; color:var(--asphalt); }
+  .chk input:focus-visible + .box{ outline:2px solid var(--hazard); outline-offset:2px; }
+
+  .icon-btn{ display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:9px; border:1px solid var(--line); background:var(--panel2); color:var(--chalk); cursor:pointer; transition:background .12s,border-color .12s,transform .08s; }
+  .icon-btn:hover{ border-color:var(--hazard); }
+  .icon-btn:active{ transform:scale(.93); }
+
+  @keyframes pulse-dot{ 0%,100%{ box-shadow:0 0 0 0 rgba(232,86,77,.55);} 50%{ box-shadow:0 0 0 5px rgba(232,86,77,0);} }
+  .live-run{ background:var(--danger); animation:pulse-dot 1.6s ease-in-out infinite; }
+  .live-idle{ background:var(--line); }
+  .live-done{ background:var(--hazard); }
+
+  @media (prefers-reduced-motion: reduce){ *{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important; } }
+
+  .hard-shadow{ box-shadow:5px 5px 0 0 rgba(0,0,0,.5); }
+  .hard-shadow:active{ box-shadow:2px 2px 0 0 rgba(0,0,0,.5); transform:translate(3px,3px); }
+
+  .stat .v{ font-family:'IBM Plex Mono',monospace; font-variant-numeric:tabular-nums; }
+
+  .nav-tab{ display:inline-flex; align-items:center; gap:7px; padding:7px 12px; border-radius:8px; font-weight:600; font-size:14px; color:rgba(244,242,236,.55); transition:color .12s,background .12s; }
+  .nav-tab:hover{ color:var(--chalk); }
+  .nav-tab.active{ color:var(--asphalt); background:var(--hazard); }
+  .nav-num{ display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:5px; background:rgba(244,242,236,.12); font-family:'Big Shoulders Display',sans-serif; font-weight:800; font-size:12px; }
+  .nav-tab.active .nav-num{ background:rgba(21,20,15,.2); }
+
+  .equal-badge{ border:2px solid var(--hazard); border-radius:10px; }
+</style>
+</head>
+<body class="bg-asphalt text-chalk font-sans antialiased min-h-screen">
+<a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:bg-hazard focus:text-asphalt focus:px-4 focus:py-2 focus:rounded-lg focus:font-semibold">Skip to simulation</a>
+<div aria-hidden="true" class="grain fixed inset-0 pointer-events-none z-50"></div>
+
+<header class="sticky top-0 z-40 bg-asphalt/92 backdrop-blur border-b border-line">
+  <div class="mx-auto max-w-7xl px-5 sm:px-8 h-16 sm:h-[4.5rem] flex items-center justify-between gap-4">
+    <a href="law_1.html" class="flex items-center gap-2.5 shrink-0">
+      <svg width="30" height="30" viewBox="0 0 28 28" fill="none">
+        <rect x="2" y="2" width="24" height="24" rx="6" fill="#f4b72a"/>
+        <path d="M14 7v9.5" stroke="#15140f" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="14" cy="20.2" r="1.9" fill="#15140f"/>
+      </svg>
+      <span class="font-display uppercase tracking-wide text-lg sm:text-xl font-extrabold leading-none">Proving Ground</span>
+    </a>
+    <nav class="flex items-center gap-1 overflow-x-auto" aria-label="Newton's laws">
+      <a href="law_1.html" class="nav-tab"><span class="nav-num">1</span>Inertia</a>
+      <a href="law_2.html" class="nav-tab"><span class="nav-num">2</span>Force &amp; mass</a>
+      <a href="law_3.html" class="nav-tab active" aria-current="page"><span class="nav-num">3</span>Reaction</a>
+    </nav>
+  </div>
+  <div class="h-1 w-full hazard-stripes opacity-80"></div>
+</header>
+
+<main id="main" class="mx-auto max-w-7xl px-5 sm:px-8">
+
+  <section class="pt-14 sm:pt-20 pb-10 sm:pb-14 grid lg:grid-cols-[1fr_auto] items-end gap-4">
+    <div>
+      <h1 class="font-display uppercase font-black leading-[0.9] tracking-tight text-6xl sm:text-7xl xl:text-8xl">Equal and<br>opposite</h1>
+      <p class="mt-6 max-w-xl text-base sm:text-lg text-chalk/70 leading-relaxed">When two vehicles collide, they hit each other with exactly the same force — a small car and a loaded truck included. What isn't equal is what that force does to each of them. Set up a crash and watch the same number appear on both sides, with very different results.</p>
+    </div>
+    <div class="hidden lg:block select-none pointer-events-none">
+      <span class="font-display font-black text-[13rem] xl:text-[16rem] leading-none text-chalk/[0.05]">3</span>
+    </div>
+  </section>
+
+  <section class="grid lg:grid-cols-[1.6fr_1fr] gap-6 sm:gap-8 pb-8">
+
+    <div class="space-y-5">
+      <div class="rounded-2xl border-2 border-line bg-panel overflow-hidden">
+        <div class="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-5 py-3 border-b border-line">
+          <div class="flex items-center gap-2">
+            <span class="flex items-center gap-1.5 text-xs font-semibold text-chalk/50 mr-1 w-16">
+              <span id="liveDot" class="w-2 h-2 rounded-full live-idle shrink-0"></span>
+              <span id="liveLabel">Ready</span>
+            </span>
+            <button id="btnPlay" class="icon-btn" aria-label="Play the simulation" type="button"></button>
+            <button id="btnStep" class="icon-btn" aria-label="Advance one frame" type="button"></button>
+            <button id="btnReset" class="icon-btn" aria-label="Reset the simulation" type="button"></button>
+          </div>
+          <div class="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-chalk/70">
+            <label class="chk"><input type="checkbox" id="cbValues" checked><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="4 12 9 18 20 6"/></svg></span>Values</label>
+            <label class="chk"><input type="checkbox" id="cbForces" checked><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="4 12 9 18 20 6"/></svg></span>Forces</label>
+            <label class="chk"><input type="checkbox" id="cbStopwatch"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="4 12 9 18 20 6"/></svg></span>Timer</label>
+          </div>
+        </div>
+        <div class="relative bg-panel2">
+          <canvas id="scene" class="block w-full" aria-label="Animated scene: two vehicles collide head-on and equal opposite force arrows appear at the impact point"></canvas>
+          <span class="absolute top-2 left-2 w-3 h-3 border-t-2 border-l-2 border-hazard/30" aria-hidden="true"></span>
+          <span class="absolute top-2 right-2 w-3 h-3 border-t-2 border-r-2 border-hazard/30" aria-hidden="true"></span>
+          <span class="absolute bottom-2 left-2 w-3 h-3 border-b-2 border-l-2 border-hazard/30" aria-hidden="true"></span>
+          <span class="absolute bottom-2 right-2 w-3 h-3 border-b-2 border-r-2 border-hazard/30" aria-hidden="true"></span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-5 px-1">
+        <div class="stat equal-badge px-3 py-2.5" data-group="values">
+          <div class="v text-2xl sm:text-3xl font-semibold text-hazard" id="statForceA">—</div>
+          <div class="text-xs text-chalk/60 mt-1">Force on your car (kN)</div>
+        </div>
+        <div class="stat equal-badge px-3 py-2.5" data-group="values">
+          <div class="v text-2xl sm:text-3xl font-semibold text-hazard" id="statForceB">—</div>
+          <div class="text-xs text-chalk/60 mt-1">Force on the other vehicle (kN)</div>
+        </div>
+        <div class="stat border-t-2 border-line pt-2.5" data-group="values">
+          <div class="v text-2xl sm:text-3xl font-semibold" id="statDvA">—</div>
+          <div class="text-xs text-chalk/50 mt-1">Your speed change (km/h)</div>
+        </div>
+        <div class="stat border-t-2 border-line pt-2.5" data-group="values">
+          <div class="v text-2xl sm:text-3xl font-semibold text-danger" id="statDvB">—</div>
+          <div class="text-xs text-chalk/50 mt-1">Their speed change (km/h)</div>
+        </div>
+        <div class="stat border-t-2 border-line pt-2.5" data-group="stopwatch">
+          <div class="v text-2xl sm:text-3xl font-semibold text-safe" id="statTime">0.00</div>
+          <div class="text-xs text-chalk/50 mt-1">Elapsed (s)</div>
+        </div>
+      </div>
+
+      <div id="readout" role="status" aria-live="polite" class="text-sm sm:text-base text-chalk/70 leading-relaxed border-l-2 border-hazard pl-4 py-1 min-h-[3rem]">Set the two vehicles up, then run the collision and compare the force on each.</div>
+    </div>
+
+    <div class="space-y-5">
+      <div class="rounded-2xl border-2 border-line bg-panel p-5 sm:p-6">
+        <h2 class="font-display uppercase font-bold text-xl tracking-wide mb-5">Your car</h2>
+        <div class="space-y-5">
+          <div>
+            <label for="massA" class="flex justify-between text-sm font-semibold text-hazard mb-2">Mass <span id="massAOut" class="font-mono">1400 kg</span></label>
+            <input type="range" id="massA" min="800" max="2200" step="100" value="1400">
+          </div>
+          <div>
+            <label for="speedA" class="flex justify-between text-sm font-semibold text-chalk/80 mb-2">Speed <span id="speedAOut" class="text-hazard font-mono">50 km/h</span></label>
+            <input type="range" id="speedA" min="10" max="100" step="5" value="50">
+          </div>
+        </div>
+      </div>
+
+      <div class="rounded-2xl border-2 border-line bg-panel p-5 sm:p-6">
+        <h2 class="font-display uppercase font-bold text-xl tracking-wide mb-5">The other vehicle</h2>
+        <div class="space-y-5">
+          <div>
+            <label for="massB" class="flex justify-between text-sm font-semibold text-danger mb-2">Mass <span id="massBOut" class="font-mono">8000 kg</span></label>
+            <input type="range" class="danger-thumb" id="massB" min="1000" max="16000" step="500" value="8000">
+          </div>
+          <div>
+            <label for="speedB" class="flex justify-between text-sm font-semibold text-chalk/80 mb-2">Speed toward you <span id="speedBOut" class="text-hazard font-mono">50 km/h</span></label>
+            <input type="range" id="speedB" min="0" max="100" step="5" value="50">
+          </div>
+        </div>
+      </div>
+
+      <div class="rounded-2xl border-2 border-line bg-panel p-5 sm:p-6">
+        <h2 class="font-display uppercase font-bold text-xl tracking-wide mb-5">Crumple zones</h2>
+        <div>
+          <label for="crumpleSlider" class="flex justify-between text-sm font-semibold text-chalk/80 mb-2">Impact duration <span id="crumpleOut" class="text-hazard font-mono">0.15 s</span></label>
+          <input type="range" id="crumpleSlider" min="0.05" max="0.4" step="0.01" value="0.15">
+          <p class="text-xs text-chalk/50 mt-2 leading-relaxed">Crumple zones stretch a crash out over more time. The same change in speed spread over longer means less force.</p>
+        </div>
+      </div>
+
+      <button id="launch" class="hard-shadow w-full bg-hazard text-asphalt font-display uppercase font-extrabold text-lg tracking-wide py-4 rounded-xl transition-transform">Run the collision</button>
+    </div>
+
+  </section>
+
+  <section class="pb-14 sm:pb-20">
+    <div class="rounded-2xl border-2 border-safe/40 bg-panel p-6 sm:p-8 flex flex-col sm:flex-row items-start gap-5">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" class="text-safe shrink-0 mt-0.5">
+        <path d="M4 17h1.5l1-4h11l1 4H20M6.5 13l1.3-4.5A2 2 0 0 1 9.7 7h4.6a2 2 0 0 1 1.9 1.5L17.5 13M7 17v2M17 17v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <p class="text-sm sm:text-base text-chalk/80 leading-relaxed">This isn't just a physics trick. <strong class="text-chalk">Trucks are 20 to 30 times heavier than passenger cars</strong>, according to the Federal Motor Carrier Safety Administration. The collision force is identical on both, but that force has to change the speed of far less mass in the car — which is why the smaller vehicle takes the worse outcome. Keep your distance from heavy vehicles.</p>
+    </div>
+  </section>
+</main>
+
+<footer class="border-t border-line mt-10">
+  <div class="mx-auto max-w-7xl px-5 sm:px-8 py-10 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-chalk/40 text-center sm:text-left">
+    <p>Proving Ground — an interactive look at Newton's three laws.</p>
+    <a href="law_1.html" class="inline-flex items-center gap-1.5 text-chalk/70 hover:text-hazard font-semibold transition-colors">Back to the moment of truth<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a>
+  </div>
+</footer>
+
+<script>
+const ICONS = {
+  play: '<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>',
+  pause: '<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><rect x="6" y="4.5" width="4.5" height="15" rx="1"/><rect x="13.5" y="4.5" width="4.5" height="15" rx="1"/></svg>',
+  step: '<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M5 4.5v15l10-7.5z"/><rect x="17" y="4.5" width="3" height="15" rx="1"/></svg>',
+  reset: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></svg>'
+};
+document.getElementById('btnStep').innerHTML = ICONS.step;
+document.getElementById('btnReset').innerHTML = ICONS.reset;
+
+const canvas = document.getElementById('scene');
+const ctx = canvas.getContext('2d');
+const W = 760, H = 220;
+const groundY = H - 34;
+const ROAD = 50;
+const scale = (W - 40) / ROAD;
+const startX = 20;
+const MU = 0.7, G = 9.8;
+const START_A = 6;
+
+function fitCanvas(){
+  const dpr = window.devicePixelRatio || 1;
+  const cssW = canvas.parentElement.clientWidth;
+  const cssH = cssW * (H / W);
+  canvas.width = Math.round(cssW * dpr);
+  canvas.height = Math.round(cssH * dpr);
+  canvas.style.width = cssW + 'px';
+  canvas.style.height = cssH + 'px';
+  ctx.setTransform((cssW / W) * dpr, 0, 0, (cssW / W) * dpr, 0, 0);
+}
+
+const massA = document.getElementById('massA');
+const massAOut = document.getElementById('massAOut');
+const speedA = document.getElementById('speedA');
+const speedAOut = document.getElementById('speedAOut');
+const massB = document.getElementById('massB');
+const massBOut = document.getElementById('massBOut');
+const speedB = document.getElementById('speedB');
+const speedBOut = document.getElementById('speedBOut');
+const crumpleSlider = document.getElementById('crumpleSlider');
+const crumpleOut = document.getElementById('crumpleOut');
+const readout = document.getElementById('readout');
+const launchBtn = document.getElementById('launch');
+const btnPlay = document.getElementById('btnPlay');
+const btnStep = document.getElementById('btnStep');
+const btnReset = document.getElementById('btnReset');
+const liveDot = document.getElementById('liveDot');
+const liveLabel = document.getElementById('liveLabel');
+const cbValues = document.getElementById('cbValues');
+const cbForces = document.getElementById('cbForces');
+const cbStopwatch = document.getElementById('cbStopwatch');
+
+const statForceA = document.getElementById('statForceA');
+const statForceB = document.getElementById('statForceB');
+const statDvA = document.getElementById('statDvA');
+const statDvB = document.getElementById('statDvB');
+const statTime = document.getElementById('statTime');
+
+let running = false, phase = 'idle', elapsed = 0;
+let posA = START_A, posB = 40, vA = 0, vB = 0;
+let collided = false, wreckV = 0, contactX = 0;
+let forceKN = null, dvA = null, dvB = null, crashElapsed = null;
+
+function bindSlider(el, onInput){
+  const update = () => {
+    const pct = (el.value - el.min) / (el.max - el.min) * 100;
+    el.style.setProperty('--fill', pct + '%');
+    onInput();
+  };
+  el.addEventListener('input', update);
+  update();
+}
+bindSlider(massA, () => { massAOut.textContent = massA.value + ' kg'; });
+bindSlider(speedA, () => { speedAOut.textContent = speedA.value + ' km/h'; });
+bindSlider(massB, () => { massBOut.textContent = massB.value + ' kg'; });
+bindSlider(speedB, () => { speedBOut.textContent = speedB.value + ' km/h'; });
+bindSlider(crumpleSlider, () => { crumpleOut.textContent = parseFloat(crumpleSlider.value).toFixed(2) + ' s'; });
+
+function setControlsLocked(locked){
+  [massA, speedA, massB, speedB, crumpleSlider].forEach(el => el.disabled = locked);
+}
+function setLive(state){
+  liveDot.className = 'w-2 h-2 rounded-full shrink-0 ' + (state==='run'?'live-run':state==='done'?'live-done':'live-idle');
+  liveLabel.textContent = state==='run'?'Live':state==='paused'?'Paused':state==='done'?'Impact':'Ready';
+}
+
+function lenA(){ return 4.2; }
+function lenB(){ const m = parseFloat(massB.value); return 4.2 + (m-1000)/15000 * 8.5; }
+function startB(){ return ROAD - lenB() - 2; }
+function heightB(){ const m = parseFloat(massB.value); return 1.5 + (m-1000)/15000 * 1.7; }
+
+function reset(){
+  running = false; phase = 'idle'; elapsed = 0;
+  posA = START_A; posB = startB(); vA = 0; vB = 0;
+  collided = false; wreckV = 0; contactX = 0;
+  forceKN = null; dvA = null; dvB = null; crashElapsed = null;
+  btnPlay.innerHTML = ICONS.play;
+  readout.textContent = 'Set the two vehicles up, then run the collision and compare the force on each.';
+  setControlsLocked(false);
+  setLive('idle');
+  updateStats();
+}
+reset();
+
+launchBtn.onclick = () => {
+  if(phase === 'done') reset();
+  posA = START_A; posB = startB();
+  vA = parseFloat(speedA.value)/3.6;
+  vB = -parseFloat(speedB.value)/3.6;
+  collided = false; elapsed = 0;
+  forceKN = null; dvA = null; dvB = null; crashElapsed = null;
+  running = true; phase = 'closing';
+  setControlsLocked(true);
+  setLive('run');
+  btnPlay.innerHTML = ICONS.pause;
+};
+btnPlay.onclick = () => {
+  if(phase === 'idle' || phase === 'done') return;
+  running = !running;
+  setLive(running ? 'run' : 'paused');
+  btnPlay.innerHTML = running ? ICONS.pause : ICONS.play;
+};
+btnStep.onclick = () => { if(!running && phase!=='idle' && phase!=='done') physicsStep(1/30); };
+btnReset.onclick = reset;
+
+function physicsStep(dt){
+  const mA = parseFloat(massA.value), mB = parseFloat(massB.value);
+  const crumple = parseFloat(crumpleSlider.value);
+
+  if(phase === 'closing'){
+    posA += vA*dt; posB += vB*dt;
+    elapsed += dt;
+    if(posA >= posB){
+      // perfectly inelastic collision: they crumple together and move as one
+      const vF = (mA*vA + mB*vB) / (mA + mB);
+      const deltaA = vF - vA;
+      const deltaB = vF - vB;
+      // impulse is identical in magnitude for both bodies — that is the third law
+      const impulse = Math.abs(mA * deltaA);
+      forceKN = (impulse / crumple) / 1000;
+      dvA = Math.abs(deltaA) * 3.6;
+      dvB = Math.abs(deltaB) * 3.6;
+      contactX = (posA + posB) / 2;
+      posA = contactX; posB = contactX;
+      wreckV = vF;
+      collided = true;
+      crashElapsed = elapsed;
+      phase = 'wreck';
+      const heavier = mB > mA ? 'the other vehicle' : (mA > mB ? 'your car' : 'neither');
+      const ratio = (dvA / Math.max(dvB, 0.01));
+      if(Math.abs(mA - mB) < 1) {
+        readout.innerHTML = `<strong>Both vehicles hit each other with ${forceKN.toFixed(0)} kN — exactly the same force.</strong> With equal mass, both change speed by the same amount (${dvA.toFixed(0)} km/h each). Newton's third law always pairs the forces; it's the masses that decide the consequences.`;
+      } else {
+        readout.innerHTML = `<strong>Both vehicles hit each other with ${forceKN.toFixed(0)} kN — exactly the same force.</strong> But your car's speed changed by ${dvA.toFixed(0)} km/h while theirs changed by only ${dvB.toFixed(0)} km/h — ${ratio.toFixed(1)}× as much. The same force acting on less mass produces a far bigger change, which is what injures people in the lighter vehicle.`;
+      }
+    }
+  } else if(phase === 'wreck'){
+    const decel = MU*G;
+    if(Math.abs(wreckV) > 0.01){
+      const sign = Math.sign(wreckV);
+      wreckV -= sign*decel*dt;
+      if(Math.sign(wreckV) !== sign) wreckV = 0;
+      contactX += wreckV*dt;
+      contactX = Math.max(lenA(), Math.min(ROAD - lenB(), contactX));
+      posA = contactX; posB = contactX;
+    } else {
+      phase = 'done'; running = false; btnPlay.innerHTML = ICONS.play; setLive('done');
+    }
+    elapsed += dt;
+  }
+  updateStats();
+}
+
+function updateStats(){
+  statForceA.textContent = forceKN === null ? '—' : forceKN.toFixed(0);
+  statForceB.textContent = forceKN === null ? '—' : forceKN.toFixed(0);
+  statDvA.textContent = dvA === null ? '—' : dvA.toFixed(0);
+  statDvB.textContent = dvB === null ? '—' : dvB.toFixed(0);
+  statTime.textContent = elapsed.toFixed(2);
+}
+
+function applyVisibility(){
+  document.querySelectorAll('[data-group="values"]').forEach(el => el.classList.toggle('hidden', !cbValues.checked));
+  document.querySelectorAll('[data-group="stopwatch"]').forEach(el => el.classList.toggle('hidden', !cbStopwatch.checked));
+}
+cbValues.onchange = applyVisibility;
+cbStopwatch.onchange = applyVisibility;
+applyVisibility();
+
+function mx(m){ return startX + m*scale; }
+function my(m){ return groundY - m*scale; }
+
+function drawVehicle(frontX, len, height, color, facing, label){
+  // frontX is the bumper that faces the collision; facing = 1 (points right) or -1 (points left)
+  const x0 = facing === 1 ? frontX - len : frontX;
+  const px = mx(x0), pw = len*scale, ph = height*scale;
+  const py = groundY - ph;
+
+  ctx.fillStyle = color; ctx.strokeStyle = '#15140f'; ctx.lineWidth = 2;
+  ctx.beginPath();
+  if(facing === 1){
+    ctx.moveTo(px, groundY);
+    ctx.lineTo(px, py + ph*0.34);
+    ctx.lineTo(px + pw*0.26, py + ph*0.34);
+    ctx.lineTo(px + pw*0.42, py);
+    ctx.lineTo(px + pw*0.80, py);
+    ctx.lineTo(px + pw, py + ph*0.42);
+    ctx.lineTo(px + pw, groundY);
+  } else {
+    ctx.moveTo(px + pw, groundY);
+    ctx.lineTo(px + pw, py + ph*0.34);
+    ctx.lineTo(px + pw*0.74, py + ph*0.34);
+    ctx.lineTo(px + pw*0.58, py);
+    ctx.lineTo(px + pw*0.20, py);
+    ctx.lineTo(px, py + ph*0.42);
+    ctx.lineTo(px, groundY);
+  }
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+
+  [0.22, 0.78].forEach(f => {
+    const wr = Math.max(4, ph*0.16);
+    ctx.beginPath(); ctx.arc(px + pw*f, groundY - wr*0.6, wr, 0, Math.PI*2);
+    ctx.fillStyle = '#15140f'; ctx.fill();
+    ctx.strokeStyle = '#5c584a'; ctx.lineWidth = 2; ctx.stroke();
+  });
+
+  ctx.fillStyle = 'rgba(244,242,236,0.75)';
+  ctx.font = '700 10px "IBM Plex Sans",Arial'; ctx.textAlign = 'center';
+  ctx.fillText(label, px + pw/2, py - 7);
+}
+
+function drawArrow(fromX, y, dir, lengthPx, color, label){
+  const toX = fromX + dir*lengthPx;
+  ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.moveTo(fromX, y); ctx.lineTo(toX, y); ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(toX + dir*9, y);
+  ctx.lineTo(toX, y - 6);
+  ctx.lineTo(toX, y + 6);
+  ctx.closePath(); ctx.fill();
+  ctx.font = '700 11px "IBM Plex Sans",Arial';
+  ctx.textAlign = dir === 1 ? 'left' : 'right';
+  ctx.fillText(label, toX + dir*14, y + 4);
+}
+
+function drawScene(){
+  ctx.fillStyle = '#242116'; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle = '#1b1913'; ctx.fillRect(0, groundY, W, H-groundY);
+  ctx.strokeStyle = '#f4b72a'; ctx.lineWidth = 3;
+  for(let x=0;x<W;x+=44){ ctx.beginPath(); ctx.moveTo(x, groundY+7); ctx.lineTo(x+24, groundY+7); ctx.stroke(); }
+
+  drawVehicle(posA, lenA(), 1.5, '#f4b72a', 1, 'Your car · ' + massA.value + ' kg');
+  drawVehicle(posB, lenB(), heightB(), '#e8564d', -1, 'Other vehicle · ' + massB.value + ' kg');
+
+  if(collided && crashElapsed !== null && (elapsed - crashElapsed) < 0.14){
+    ctx.fillStyle = 'rgba(244,183,42,0.22)'; ctx.fillRect(0,0,W,H);
+  }
+
+  if(collided && cbForces.checked && forceKN !== null){
+    const cx = mx(contactX);
+    const y = my(3.9);
+    const label = forceKN.toFixed(0) + ' kN';
+    // identical arrow lengths: the whole point is that the forces are equal
+    drawArrow(cx - 4, y, -1, 74, '#f4f2ec', label);
+    drawArrow(cx + 4, y, 1, 74, '#f4f2ec', label);
+    ctx.fillStyle = 'rgba(244,242,236,0.55)';
+    ctx.font = '600 10px "IBM Plex Sans",Arial'; ctx.textAlign = 'center';
+    ctx.fillText('equal and opposite', cx, y - 16);
+  }
+}
+
+let lastT = null;
+function frame(t){
+  if(lastT===null) lastT = t;
+  const dt = Math.min((t-lastT)/1000, 0.05);
+  lastT = t;
+  if(running) physicsStep(dt);
+  ctx.clearRect(0,0,W,H);
+  drawScene();
+  requestAnimationFrame(frame);
+}
+fitCanvas();
+let resizeTimer;
+window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(fitCanvas, 100); });
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

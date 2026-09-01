@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proving Ground — Newton's First Law: The Moment of Truth</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          asphalt: '#15140f', panel: '#1d1b15', panel2: '#242116', line: '#37341f',
+          hazard: '#f4b72a', danger: '#e8564d', safe: '#3fae6a', chalk: '#f4f2ec',
+        },
+        fontFamily: {
+          display: ['"Big Shoulders Display"', 'sans-serif'],
+          sans: ['"IBM Plex Sans"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+          mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace'],
+        },
+      }
+    }
+  }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800;900&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{ --asphalt:#15140f; --panel:#1d1b15; --panel2:#242116; --line:#37341f; --hazard:#f4b72a; --danger:#e8564d; --safe:#3fae6a; --chalk:#f4f2ec; }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--asphalt); font-feature-settings:"tnum" 1;}
+  ::selection{ background:var(--hazard); color:var(--asphalt); }
+  :focus-visible{ outline:2px solid var(--hazard); outline-offset:2px; }
+
+  .grain{ background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"); opacity:.035; }
+  .hazard-stripes{ background-image:repeating-linear-gradient(135deg, var(--hazard) 0 14px, #1a1810 14px 28px); }
+
+  input[type=range]{ -webkit-appearance:none; appearance:none; width:100%; height:6px; border-radius:999px; background:var(--line); outline:none; }
+  input[type=range]::-webkit-slider-runnable-track{ height:6px; border-radius:999px; background:linear-gradient(to right, var(--hazard) 0 var(--fill,50%), var(--line) var(--fill,50%) 100%); }
+  input[type=range]::-moz-range-track{ height:6px; border-radius:999px; background:var(--line); }
+  input[type=range]::-moz-range-progress{ height:6px; border-radius:999px; background:var(--hazard); }
+  input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; appearance:none; margin-top:-7px; width:20px; height:20px; border-radius:50%; background:var(--chalk); border:3px solid var(--hazard); cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.5); transition:transform .12s ease; }
+  input[type=range]::-webkit-slider-thumb:hover{ transform:scale(1.1); }
+  input[type=range]::-moz-range-thumb{ width:20px; height:20px; border-radius:50%; background:var(--chalk); border:3px solid var(--hazard); cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.5); }
+  input[type=range]:disabled{ opacity:.35; cursor:not-allowed; }
+  input[type=range]:focus-visible::-webkit-slider-thumb{ outline:2px solid var(--hazard); outline-offset:3px; }
+
+  .chk{ display:inline-flex; align-items:center; gap:7px; cursor:pointer; user-select:none; }
+  .chk input{ position:absolute; opacity:0; width:1px; height:1px; }
+  .chk .box{ width:17px; height:17px; border-radius:5px; border:2px solid var(--line); background:var(--panel2); display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:background .12s,border-color .12s; }
+  .chk input:checked + .box{ background:var(--hazard); border-color:var(--hazard); }
+  .chk input:checked + .box svg{ opacity:1; transform:scale(1); }
+  .chk .box svg{ opacity:0; transform:scale(.5); transition:transform .12s,opacity .12s; width:11px; height:11px; color:var(--asphalt); }
+  .chk input:focus-visible + .box{ outline:2px solid var(--hazard); outline-offset:2px; }
+
+  .icon-btn{ display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:9px; border:1px solid var(--line); background:var(--panel2); color:var(--chalk); cursor:pointer; transition:background .12s,border-color .12s,transform .08s; }
+  .icon-btn:hover{ border-color:var(--hazard); }
+  .icon-btn:active{ transform:scale(.93); }
+
+  .seg-highlight{ position:absolute; inset:4px; width:calc(50% - 4px); border-radius:8px; transition:transform .22s cubic-bezier(.4,0,.2,1),background-color .22s; background:var(--danger); }
+  .seg-on{ transform:translateX(100%); background:var(--safe); }
+
+  @keyframes pulse-dot{ 0%,100%{ box-shadow:0 0 0 0 rgba(232,86,77,.55);} 50%{ box-shadow:0 0 0 5px rgba(232,86,77,0);} }
+  .live-run{ background:var(--danger); animation:pulse-dot 1.6s ease-in-out infinite; }
+  .live-idle{ background:var(--line); }
+  .live-done{ background:var(--hazard); }
+
+  @media (prefers-reduced-motion: reduce){ *{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important; } }
+
+  .hard-shadow{ box-shadow:5px 5px 0 0 rgba(0,0,0,.5); }
+  .hard-shadow:active{ box-shadow:2px 2px 0 0 rgba(0,0,0,.5); transform:translate(3px,3px); }
+
+  .stat .v{ font-family:'IBM Plex Mono',monospace; font-variant-numeric:tabular-nums; }
+
+  .nav-tab{ display:inline-flex; align-items:center; gap:7px; padding:7px 12px; border-radius:8px; font-weight:600; font-size:14px; color:rgba(244,242,236,.55); transition:color .12s,background .12s; }
+  .nav-tab:hover{ color:var(--chalk); }
+  .nav-tab.active{ color:var(--asphalt); background:var(--hazard); }
+  .nav-num{ display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:5px; background:rgba(244,242,236,.12); font-family:'Big Shoulders Display',sans-serif; font-weight:800; font-size:12px; }
+  .nav-tab.active .nav-num{ background:rgba(21,20,15,.2); }
+</style>
+</head>
+<body class="bg-asphalt text-chalk font-sans antialiased min-h-screen">
+<a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:bg-hazard focus:text-asphalt focus:px-4 focus:py-2 focus:rounded-lg focus:font-semibold">Skip to simulation</a>
+<div aria-hidden="true" class="grain fixed inset-0 pointer-events-none z-50"></div>
+
+<header class="sticky top-0 z-40 bg-asphalt/92 backdrop-blur border-b border-line">
+  <div class="mx-auto max-w-7xl px-5 sm:px-8 h-16 sm:h-[4.5rem] flex items-center justify-between gap-4">
+    <a href="law_1.html" class="flex items-center gap-2.5 shrink-0">
+      <svg width="30" height="30" viewBox="0 0 28 28" fill="none">
+        <rect x="2" y="2" width="24" height="24" rx="6" fill="#f4b72a"/>
+        <path d="M14 7v9.5" stroke="#15140f" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="14" cy="20.2" r="1.9" fill="#15140f"/>
+      </svg>
+      <span class="font-display uppercase tracking-wide text-lg sm:text-xl font-extrabold leading-none">Proving Ground</span>
+    </a>
+    <nav class="flex items-center gap-1 overflow-x-auto" aria-label="Newton's laws">
+      <a href="law_1.html" class="nav-tab active" aria-current="page"><span class="nav-num">1</span>Inertia</a>
+      <a href="law_2.html" class="nav-tab"><span class="nav-num">2</span>Force &amp; mass</a>
+      <a href="law_3.html" class="nav-tab"><span class="nav-num">3</span>Reaction</a>
+    </nav>
+  </div>
+  <div class="h-1 w-full hazard-stripes opacity-80"></div>
+</header>
+
+<main id="main" class="mx-auto max-w-7xl px-5 sm:px-8">
+
+  <section class="pt-14 sm:pt-20 pb-10 sm:pb-14 grid lg:grid-cols-[1fr_auto] items-end gap-4">
+    <div>
+      <h1 class="font-display uppercase font-black leading-[0.9] tracking-tight text-6xl sm:text-7xl xl:text-8xl">The moment<br>of truth</h1>
+      <p class="mt-6 max-w-xl text-base sm:text-lg text-chalk/70 leading-relaxed">Seatbelts exist because of Newton's first law: a body in motion stays in motion until a force stops it. The car stops at the barrier in a fraction of a second. Without a belt, nothing stops the passenger — so they keep travelling at the speed the car was doing.</p>
+    </div>
+    <div class="hidden lg:block select-none pointer-events-none">
+      <span class="font-display font-black text-[13rem] xl:text-[16rem] leading-none text-chalk/[0.05]">1</span>
+    </div>
+  </section>
+
+  <section class="grid lg:grid-cols-[1.6fr_1fr] gap-6 sm:gap-8 pb-8">
+
+    <div class="space-y-5">
+      <div class="rounded-2xl border-2 border-line bg-panel overflow-hidden">
+        <div class="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-5 py-3 border-b border-line">
+          <div class="flex items-center gap-2">
+            <span class="flex items-center gap-1.5 text-xs font-semibold text-chalk/50 mr-1 w-16">
+              <span id="liveDot" class="w-2 h-2 rounded-full live-idle shrink-0"></span>
+              <span id="liveLabel">Ready</span>
+            </span>
+            <button id="btnPlay" class="icon-btn" aria-label="Play the simulation" type="button"></button>
+            <button id="btnStep" class="icon-btn" aria-label="Advance one frame" type="button"></button>
+            <button id="btnReset" class="icon-btn" aria-label="Reset the simulation" type="button"></button>
+          </div>
+          <div class="flex items-center gap-4 text-xs sm:text-sm text-chalk/70">
+            <label class="chk"><input type="checkbox" id="cbValues" checked><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="4 12 9 18 20 6"/></svg></span>Values</label>
+            <label class="chk"><input type="checkbox" id="cbSpeed"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="4 12 9 18 20 6"/></svg></span>Speed</label>
+            <label class="chk"><input type="checkbox" id="cbStopwatch"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="4 12 9 18 20 6"/></svg></span>Timer</label>
+          </div>
+        </div>
+        <div class="relative bg-panel2">
+          <canvas id="scene" class="block w-full" aria-label="Animated scene: a car hits a concrete barrier and an unbelted passenger is thrown forward over it"></canvas>
+          <span class="absolute top-2 left-2 w-3 h-3 border-t-2 border-l-2 border-hazard/30" aria-hidden="true"></span>
+          <span class="absolute top-2 right-2 w-3 h-3 border-t-2 border-r-2 border-hazard/30" aria-hidden="true"></span>
+          <span class="absolute bottom-2 left-2 w-3 h-3 border-b-2 border-l-2 border-hazard/30" aria-hidden="true"></span>
+          <span class="absolute bottom-2 right-2 w-3 h-3 border-b-2 border-r-2 border-hazard/30" aria-hidden="true"></span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-5 px-1">
+        <div class="stat border-t-2 border-line pt-2.5" data-group="values">
+          <div class="v text-2xl sm:text-3xl font-semibold" id="statSpeedKmh">0</div>
+          <div class="text-xs text-chalk/50 mt-1">Car speed (km/h)</div>
+        </div>
+        <div class="stat border-t-2 border-line pt-2.5" data-group="values">
+          <div class="v text-2xl sm:text-3xl font-semibold" id="statImpactSpeed">—</div>
+          <div class="text-xs text-chalk/50 mt-1">Speed at impact (km/h)</div>
+        </div>
+        <div class="stat border-t-2 border-line pt-2.5" data-group="values">
+          <div class="v text-2xl sm:text-3xl font-semibold text-danger" id="statThrown">—</div>
+          <div class="text-xs text-chalk/50 mt-1">Passenger thrown (m)</div>
+        </div>
+        <div class="stat border-t-2 border-line pt-2.5" data-group="values">
+          <div class="v text-2xl sm:text-3xl font-semibold" id="statOutcome">—</div>
+          <div class="text-xs text-chalk/50 mt-1">Outcome</div>
+        </div>
+        <div class="stat border-t-2 border-line pt-2.5 col-span-2" data-group="speed">
+          <div class="v text-2xl sm:text-3xl font-semibold" id="statGaugeSpeed">0.0</div>
+          <div class="text-xs text-chalk/50 mt-1 mb-2">Passenger speed (m/s)</div>
+          <div class="h-1.5 w-full rounded-full bg-line overflow-hidden"><div id="speedBar" class="h-full bg-danger rounded-full" style="width:0%"></div></div>
+        </div>
+        <div class="stat border-t-2 border-line pt-2.5" data-group="stopwatch">
+          <div class="v text-2xl sm:text-3xl font-semibold text-safe" id="statTime">0.00</div>
+          <div class="text-xs text-chalk/50 mt-1">Elapsed (s)</div>
+        </div>
+      </div>
+
+      <div id="readout" role="status" aria-live="polite" class="text-sm sm:text-base text-chalk/70 leading-relaxed border-l-2 border-hazard pl-4 py-1 min-h-[3rem]">Pick a speed and decide whether the passenger is buckled, then drive into the barrier.</div>
+    </div>
+
+    <div class="space-y-5">
+      <div class="rounded-2xl border-2 border-line bg-panel p-5 sm:p-6">
+        <h2 class="font-display uppercase font-bold text-xl tracking-wide mb-5">The crash</h2>
+        <div class="space-y-5">
+          <div>
+            <label for="speedSlider" class="flex justify-between text-sm font-semibold text-chalk/80 mb-2">Impact speed <span id="speedOut" class="text-hazard font-mono">50 km/h</span></label>
+            <input type="range" id="speedSlider" min="20" max="90" step="5" value="50">
+          </div>
+          <div>
+            <label for="distSlider" class="flex justify-between text-sm font-semibold text-chalk/80 mb-2">Run-up to barrier <span id="distOut" class="text-hazard font-mono">8.0 m</span></label>
+            <input type="range" id="distSlider" min="4" max="16" step="0.5" value="8">
+          </div>
+        </div>
+      </div>
+
+      <div class="rounded-2xl border-2 border-line bg-panel p-5 sm:p-6">
+        <h2 class="font-display uppercase font-bold text-xl tracking-wide mb-5">The passenger</h2>
+        <div class="relative flex rounded-lg border border-line bg-panel2 p-1 mb-5" role="group" aria-label="Seatbelt status" id="toggle">
+          <div id="toggleHighlight" class="seg-highlight"></div>
+          <button type="button" id="btn-off" aria-pressed="true" class="relative z-10 flex-1 py-2.5 text-sm font-semibold rounded-md transition-colors">Unbuckled</button>
+          <button type="button" id="btn-on" aria-pressed="false" class="relative z-10 flex-1 py-2.5 text-sm font-semibold rounded-md transition-colors">Buckled</button>
+        </div>
+        <div class="space-y-5">
+          <div id="restraintBlock" class="opacity-40 transition-opacity">
+            <label for="restraintSlider" class="flex justify-between text-sm font-semibold text-chalk/80 mb-2">Belt strength <span id="restraintOut" class="text-hazard font-mono">85%</span></label>
+            <input type="range" id="restraintSlider" min="0" max="100" step="5" value="85" disabled>
+          </div>
+        </div>
+      </div>
+
+      <button id="launch" class="hard-shadow w-full bg-hazard text-asphalt font-display uppercase font-extrabold text-lg tracking-wide py-4 rounded-xl transition-transform">Run the crash test</button>
+    </div>
+
+  </section>
+
+  <section class="pb-14 sm:pb-20">
+    <div class="rounded-2xl border-2 border-safe/40 bg-panel p-6 sm:p-8 flex flex-col sm:flex-row items-start gap-5">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" class="text-safe shrink-0 mt-0.5">
+        <path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6l7-3z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+        <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <p class="text-sm sm:text-base text-chalk/80 leading-relaxed">This isn't just a physics trick. <strong class="text-chalk">Seatbelts cut the risk of death for front-seat passengers by about 45%, and serious injury by 50%</strong>, according to the U.S. National Highway Traffic Safety Administration, which also notes that being completely thrown from a vehicle is almost always deadly. The dummy is standing in for you — buckle up.</p>
+    </div>
+  </section>
+</main>
+
+<footer class="border-t border-line mt-10">
+  <div class="mx-auto max-w-7xl px-5 sm:px-8 py-10 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-chalk/40 text-center sm:text-left">
+    <p>Proving Ground — an interactive look at Newton's three laws.</p>
+    <a href="law_2.html" class="inline-flex items-center gap-1.5 text-chalk/70 hover:text-hazard font-semibold transition-colors">Next up: the weight of destiny<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a>
+  </div>
+</footer>
+
+<script>
+const ICONS = {
+  play: '<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>',
+  pause: '<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><rect x="6" y="4.5" width="4.5" height="15" rx="1"/><rect x="13.5" y="4.5" width="4.5" height="15" rx="1"/></svg>',
+  step: '<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M5 4.5v15l10-7.5z"/><rect x="17" y="4.5" width="3" height="15" rx="1"/></svg>',
+  reset: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></svg>'
+};
+document.getElementById('btnStep').innerHTML = ICONS.step;
+document.getElementById('btnReset').innerHTML = ICONS.reset;
+
+const canvas = document.getElementById('scene');
+const ctx = canvas.getContext('2d');
+const W = 760, H = 250;
+const groundY = H - 30;
+const startX = 24;
+const GRAV = 9.8;
+const SLIDE_DECEL = 12;
+const LAUNCH_VY = 2.6;
+const EJECT_THRESHOLD = 3.5;
+const SEAT_Y = 1.5;
+const CAR_LEN = 3.6, CAR_H = 1.15, CAR_FLOOR = 0.34;
+const BARRIER_H = 0.9, BARRIER_W = 0.55;
+const VIEW_MIN = 16, VIEW_MAX_CAP = 70;
+const GAUGE_MAX = 34;
+
+function fitCanvas(){
+  const dpr = window.devicePixelRatio || 1;
+  const cssW = canvas.parentElement.clientWidth;
+  const cssH = cssW * (H / W);
+  canvas.width = Math.round(cssW * dpr);
+  canvas.height = Math.round(cssH * dpr);
+  canvas.style.width = cssW + 'px';
+  canvas.style.height = cssH + 'px';
+  ctx.setTransform((cssW / W) * dpr, 0, 0, (cssW / W) * dpr, 0, 0);
+}
+
+const speedSlider = document.getElementById('speedSlider');
+const speedOut = document.getElementById('speedOut');
+const distSlider = document.getElementById('distSlider');
+const distOut = document.getElementById('distOut');
+const restraintSlider = document.getElementById('restraintSlider');
+const restraintOut = document.getElementById('restraintOut');
+const restraintBlock = document.getElementById('restraintBlock');
+const btnOn = document.getElementById('btn-on');
+const btnOff = document.getElementById('btn-off');
+const toggleHighlight = document.getElementById('toggleHighlight');
+const readout = document.getElementById('readout');
+const launchBtn = document.getElementById('launch');
+const btnPlay = document.getElementById('btnPlay');
+const btnStep = document.getElementById('btnStep');
+const btnReset = document.getElementById('btnReset');
+const liveDot = document.getElementById('liveDot');
+const liveLabel = document.getElementById('liveLabel');
+const cbValues = document.getElementById('cbValues');
+const cbSpeed = document.getElementById('cbSpeed');
+const cbStopwatch = document.getElementById('cbStopwatch');
+
+const statSpeedKmh = document.getElementById('statSpeedKmh');
+const statImpactSpeed = document.getElementById('statImpactSpeed');
+const statThrown = document.getElementById('statThrown');
+const statOutcome = document.getElementById('statOutcome');
+const statGaugeSpeed = document.getElementById('statGaugeSpeed');
+const speedBar = document.getElementById('speedBar');
+const statTime = document.getElementById('statTime');
+
+let buckled = false, started = false;
+let running = false, phase = 'idle', elapsed = 0;
+let carPos = 0, carVel = 0;
+let dummy = { x: 0, y: SEAT_Y, vx: 0, vy: 0, mode: 'seat', spin: 0 };
+let impactSpeed = null, thrownDist = null, outcome = null;
+let viewMax = VIEW_MIN, crashElapsed = null;
+
+function bindSlider(el, onInput){
+  const update = () => {
+    const pct = (el.value - el.min) / (el.max - el.min) * 100;
+    el.style.setProperty('--fill', pct + '%');
+    onInput();
+  };
+  el.addEventListener('input', update);
+  update();
+}
+bindSlider(speedSlider, () => { speedOut.textContent = speedSlider.value + ' km/h'; updateStats(); });
+bindSlider(distSlider, () => { distOut.textContent = parseFloat(distSlider.value).toFixed(1) + ' m'; });
+bindSlider(restraintSlider, () => { restraintOut.textContent = restraintSlider.value + '%'; });
+
+function setBuckled(v){
+  buckled = v;
+  btnOff.setAttribute('aria-pressed', String(!v));
+  btnOn.setAttribute('aria-pressed', String(v));
+  toggleHighlight.classList.toggle('seg-on', v);
+  btnOff.classList.toggle('text-asphalt', !v);
+  btnOff.classList.toggle('text-chalk/55', v);
+  btnOn.classList.toggle('text-asphalt', v);
+  btnOn.classList.toggle('text-chalk/55', !v);
+  restraintSlider.disabled = started || !v;
+  restraintBlock.classList.toggle('opacity-40', !v);
+}
+btnOn.onclick = () => !started && setBuckled(true);
+btnOff.onclick = () => !started && setBuckled(false);
+setBuckled(false);
+
+function setControlsLocked(locked){
+  [speedSlider, distSlider].forEach(el => el.disabled = locked);
+  restraintSlider.disabled = locked || !buckled;
+  btnOn.disabled = locked; btnOff.disabled = locked;
+  btnOn.classList.toggle('opacity-50', locked);
+  btnOff.classList.toggle('opacity-50', locked);
+}
+function setLive(state){
+  liveDot.className = 'w-2 h-2 rounded-full shrink-0 ' + (state==='run'?'live-run':state==='done'?'live-done':'live-idle');
+  liveLabel.textContent = state==='run'?'Live':state==='paused'?'Paused':state==='done'?'Impact':'Ready';
+}
+
+function wallDistance(){ return parseFloat(distSlider.value); }
+
+function reset(){
+  running = false; phase = 'idle'; started = false; elapsed = 0;
+  carPos = 0; carVel = 0;
+  dummy = { x: 0, y: SEAT_Y, vx: 0, vy: 0, mode: 'seat', spin: 0 };
+  impactSpeed = null; thrownDist = null; outcome = null; crashElapsed = null;
+  viewMax = VIEW_MIN;
+  btnPlay.innerHTML = ICONS.play;
+  readout.textContent = 'Pick a speed and decide whether the passenger is buckled, then drive into the barrier.';
+  setControlsLocked(false);
+  setLive('idle');
+  updateStats();
+}
+reset();
+
+launchBtn.onclick = () => {
+  if(phase === 'done') reset();
+  carPos = 0;
+  carVel = parseFloat(speedSlider.value) / 3.6;
+  dummy = { x: 0, y: SEAT_Y, vx: carVel, vy: 0, mode: 'seat', spin: 0 };
+  elapsed = 0; started = true; running = true; phase = 'driving';
+  setControlsLocked(true);
+  setLive('run');
+  btnPlay.innerHTML = ICONS.pause;
+};
+btnPlay.onclick = () => {
+  if(phase === 'idle' || phase === 'done') return;
+  running = !running;
+  setLive(running ? 'run' : 'paused');
+  btnPlay.innerHTML = running ? ICONS.pause : ICONS.play;
+};
+btnStep.onclick = () => { if(!running && phase!=='idle' && phase!=='done') physicsStep(1/30); };
+btnReset.onclick = reset;
+
+function finish(){
+  phase = 'done'; running = false;
+  btnPlay.innerHTML = ICONS.play;
+  setLive('done');
+}
+
+function physicsStep(dt){
+  const wall = wallDistance();
+
+  if(phase === 'driving'){
+    carPos += carVel*dt;
+    dummy.x = carPos; dummy.vx = carVel;
+    elapsed += dt;
+    if(carPos >= wall){
+      carPos = wall;
+      impactSpeed = carVel;
+      carVel = 0;
+      crashElapsed = elapsed;
+      const restraint = buckled ? parseFloat(restraintSlider.value)/100 : 0;
+      const residual = impactSpeed * (1 - restraint);
+      dummy.x = wall; dummy.y = SEAT_Y; dummy.vx = residual;
+      if(residual > EJECT_THRESHOLD){
+        dummy.vy = LAUNCH_VY;
+        dummy.mode = 'flying';
+        phase = 'ejecting';
+      } else {
+        dummy.vx = residual; dummy.mode = 'held';
+        phase = 'settling';
+        outcome = 'Held';
+        thrownDist = 0;
+        readout.innerHTML = `<strong>Buckled — the belt held.</strong> Impact at ${(impactSpeed*3.6).toFixed(0)} km/h. The belt applied the force needed to stop the passenger with the car, instead of letting them keep travelling.`;
+      }
+    }
+  } else if(phase === 'ejecting'){
+    dummy.vy -= GRAV*dt;
+    dummy.x += dummy.vx*dt;
+    dummy.y += dummy.vy*dt;
+    dummy.spin += dt*7;
+    elapsed += dt;
+    if(dummy.y <= 0){
+      dummy.y = 0; dummy.vy = 0;
+      dummy.mode = 'sliding';
+      phase = 'sliding';
+    }
+  } else if(phase === 'sliding'){
+    dummy.vx -= SLIDE_DECEL*dt;
+    dummy.spin += dt*3;
+    if(dummy.vx <= 0){
+      dummy.vx = 0;
+      dummy.mode = 'stopped';
+      thrownDist = dummy.x - wall;
+      outcome = 'Ejected';
+      const kmh = (impactSpeed*3.6).toFixed(0);
+      if(buckled){
+        readout.innerHTML = `<strong>Buckled, but the belt was too weak.</strong> Impact at ${kmh} km/h. It only absorbed ${restraintSlider.value}% of the passenger's motion — they still came out of the seat and travelled ${thrownDist.toFixed(1)} m past the barrier. Try a stronger belt.`;
+      } else {
+        readout.innerHTML = `<strong>Unbuckled — thrown ${thrownDist.toFixed(1)} m.</strong> Impact at ${kmh} km/h. The car stopped against the barrier in a fraction of a second, but nothing acted on the passenger, so they kept going at ${kmh} km/h. That's inertia, and that's what a seatbelt prevents.`;
+      }
+      finish();
+    } else {
+      dummy.x += dummy.vx*dt;
+    }
+    elapsed += dt;
+  } else if(phase === 'settling'){
+    if(dummy.vx > 0.05){
+      dummy.vx -= 9*dt;
+      if(dummy.vx < 0) dummy.vx = 0;
+      dummy.x += dummy.vx*dt;
+      const cap = wall + 0.45;
+      if(dummy.x > cap) dummy.x = cap;
+      elapsed += dt;
+    } else {
+      finish();
+    }
+  }
+
+  const target = Math.max(VIEW_MIN, Math.min(VIEW_MAX_CAP, Math.max(wall + 5, dummy.x + 4)));
+  viewMax += (target - viewMax) * Math.min(1, dt*2.5);
+  updateStats();
+}
+
+function updateStats(){
+  statSpeedKmh.textContent = speedSlider.value;
+  statImpactSpeed.textContent = impactSpeed === null ? '—' : (impactSpeed*3.6).toFixed(0);
+  statThrown.textContent = thrownDist === null ? '—' : thrownDist.toFixed(1);
+  statOutcome.textContent = outcome === null ? '—' : outcome;
+  statOutcome.className = 'v text-2xl sm:text-3xl font-semibold ' + (outcome === 'Held' ? 'text-safe' : outcome === 'Ejected' ? 'text-danger' : '');
+  const shown = phase === 'driving' ? carVel : dummy.vx;
+  statGaugeSpeed.textContent = shown.toFixed(1);
+  speedBar.style.width = Math.min(100, (shown/GAUGE_MAX)*100) + '%';
+  statTime.textContent = elapsed.toFixed(2);
+}
+
+function applyVisibility(){
+  document.querySelectorAll('[data-group="values"]').forEach(el => el.classList.toggle('hidden', !cbValues.checked));
+  document.querySelectorAll('[data-group="speed"]').forEach(el => el.classList.toggle('hidden', !cbSpeed.checked));
+  document.querySelectorAll('[data-group="stopwatch"]').forEach(el => el.classList.toggle('hidden', !cbStopwatch.checked));
+}
+cbValues.onchange = applyVisibility;
+cbSpeed.onchange = applyVisibility;
+cbStopwatch.onchange = applyVisibility;
+applyVisibility();
+
+function ppm(){ return (W - startX - 30) / viewMax; }
+function mx(m){ return startX + m*ppm(); }
+function my(m){ return groundY - m*ppm(); }
+
+function drawScene(){
+  const p = ppm();
+  ctx.fillStyle = '#242116'; ctx.fillRect(0,0,W,H);
+
+  // road surface + centre line
+  ctx.fillStyle = '#1b1913';
+  ctx.fillRect(0, groundY, W, H-groundY);
+  ctx.strokeStyle = '#f4b72a'; ctx.lineWidth = 3;
+  for(let x=0;x<W;x+=44){ ctx.beginPath(); ctx.moveTo(x, groundY+5); ctx.lineTo(x+24, groundY+5); ctx.stroke(); }
+
+  // distance ticks every 5 m
+  ctx.fillStyle = 'rgba(244,242,236,0.28)'; ctx.font = '600 10px "IBM Plex Sans",Arial'; ctx.textAlign = 'center';
+  for(let m=0; m<=viewMax; m+=5){
+    const x = mx(m);
+    if(x > W-8) break;
+    ctx.fillRect(x, groundY-4, 1, 4);
+    if(m>0) ctx.fillText(m+'m', x, groundY+22);
+  }
+
+  const wall = wallDistance();
+
+  // concrete barrier
+  const bx = mx(wall), bw = Math.max(6, BARRIER_W*p), bh = BARRIER_H*p;
+  ctx.fillStyle = '#6b6759';
+  ctx.beginPath();
+  ctx.moveTo(bx, groundY);
+  ctx.lineTo(bx + bw*0.22, groundY - bh);
+  ctx.lineTo(bx + bw*0.78, groundY - bh);
+  ctx.lineTo(bx + bw, groundY);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#e8564d';
+  ctx.fillRect(bx + bw*0.2, groundY - bh*0.62, bw*0.6, Math.max(3, bh*0.16));
+
+  // car
+  const crashed = impactSpeed !== null;
+  const carFront = mx(carPos);
+  const bodyW = CAR_LEN*p, bodyH = CAR_H*p;
+  const bodyX = carFront - bodyW, bodyY = my(CAR_FLOOR + CAR_H);
+  const crumple = crashed ? Math.min(0.16*p, bodyW*0.1) : 0;
+
+  ctx.fillStyle = '#4a473c'; ctx.strokeStyle = '#15140f'; ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(bodyX, bodyY + bodyH);
+  ctx.lineTo(bodyX, bodyY + bodyH*0.38);
+  ctx.lineTo(bodyX + bodyW*0.28, bodyY + bodyH*0.38);
+  ctx.lineTo(bodyX + bodyW*0.44, bodyY);
+  ctx.lineTo(bodyX + bodyW*0.78, bodyY);
+  ctx.lineTo(bodyX + bodyW*0.9 - crumple, bodyY + bodyH*0.42);
+  ctx.lineTo(bodyX + bodyW - crumple, bodyY + bodyH*0.46);
+  ctx.lineTo(bodyX + bodyW - crumple, bodyY + bodyH);
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+
+  // windscreen
+  ctx.fillStyle = 'rgba(120,150,160,0.30)';
+  ctx.beginPath();
+  ctx.moveTo(bodyX + bodyW*0.62, bodyY + bodyH*0.06);
+  ctx.lineTo(bodyX + bodyW*0.76, bodyY + bodyH*0.06);
+  ctx.lineTo(bodyX + bodyW*0.86, bodyY + bodyH*0.40);
+  ctx.lineTo(bodyX + bodyW*0.62, bodyY + bodyH*0.40);
+  ctx.closePath(); ctx.fill();
+
+  [0.24, 0.74].forEach(f => {
+    const wx = bodyX + bodyW*f, wr = Math.max(4, 0.34*p);
+    ctx.beginPath(); ctx.arc(wx, my(0.34), wr, 0, Math.PI*2);
+    ctx.fillStyle = '#15140f'; ctx.fill();
+    ctx.strokeStyle = '#5c584a'; ctx.lineWidth = 2; ctx.stroke();
+  });
+
+  // seatbelt indicator across the seated passenger
+  const dx = mx(dummy.x - (dummy.mode === 'seat' || dummy.mode === 'held' ? 1.35 : 0));
+  const dy = my(dummy.y);
+  const dr = Math.max(4, 0.3*p);
+
+  if(buckled && (dummy.mode === 'seat' || dummy.mode === 'held')){
+    ctx.strokeStyle = '#3fae6a'; ctx.lineWidth = Math.max(2, 0.09*p);
+    ctx.beginPath();
+    ctx.moveTo(dx - dr*1.1, dy + dr*2.4);
+    ctx.lineTo(dx + dr*1.0, dy + dr*0.2);
+    ctx.stroke();
+  }
+
+  // passenger
+  ctx.save();
+  ctx.translate(dx, dy);
+  if(dummy.mode === 'flying' || dummy.mode === 'sliding' || dummy.mode === 'stopped'){
+    ctx.rotate(dummy.spin);
+  }
+  ctx.beginPath(); ctx.arc(0, 0, dr, 0, Math.PI*2);
+  ctx.fillStyle = buckled ? '#3fae6a' : '#f4b72a';
+  ctx.fill();
+  ctx.strokeStyle = '#15140f'; ctx.lineWidth = 2; ctx.stroke();
+  // torso
+  ctx.strokeStyle = buckled ? '#3fae6a' : '#f4b72a';
+  ctx.lineWidth = Math.max(3, dr*0.72);
+  ctx.beginPath(); ctx.moveTo(0, dr*0.9); ctx.lineTo(0, dr*2.5); ctx.stroke();
+  ctx.restore();
+
+  // impact flash
+  if(crashElapsed !== null && (elapsed - crashElapsed) < 0.14){
+    ctx.fillStyle = 'rgba(244,183,42,0.20)';
+    ctx.fillRect(0,0,W,H);
+  }
+
+  // landing marker
+  if(thrownDist !== null && thrownDist > 0){
+    const lx = mx(dummy.x);
+    ctx.strokeStyle = '#e8564d'; ctx.lineWidth = 2; ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(lx, groundY); ctx.lineTo(lx, groundY-34); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#e8564d'; ctx.font = '700 11px "IBM Plex Sans",Arial'; ctx.textAlign = 'center';
+    ctx.fillText(thrownDist.toFixed(1)+' m', lx, groundY-40);
+  }
+}
+
+let lastT = null;
+function frame(t){
+  if(lastT===null) lastT = t;
+  const dt = Math.min((t-lastT)/1000, 0.05);
+  lastT = t;
+  if(running) physicsStep(dt);
+  ctx.clearRect(0,0,W,H);
+  drawScene();
+  requestAnimationFrame(frame);
+}
+fitCanvas();
+let resizeTimer;
+window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(fitCanvas, 100); });
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
