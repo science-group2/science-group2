@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Proving Ground — Newton's Second Law: The Weight of Destiny</title>
+<title>NEWTONS SECOND LAW</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
   tailwind.config = {
@@ -92,7 +92,7 @@
         <path d="M14 7v9.5" stroke="#15140f" stroke-width="3" stroke-linecap="round"/>
         <circle cx="14" cy="20.2" r="1.9" fill="#15140f"/>
       </svg>
-      <span class="font-display uppercase tracking-wide text-lg sm:text-xl font-extrabold leading-none">Proving Ground</span>
+      <span class="font-display uppercase tracking-wide text-lg sm:text-xl font-extrabold leading-none">NEWTONS SECOND LAW - GROUP 2</span>
     </a>
     <nav class="flex items-center gap-1 overflow-x-auto" aria-label="Newton's laws">
       <a href="law_1.html" class="nav-tab"><span class="nav-num">1</span>Inertia</a>
@@ -107,9 +107,9 @@
 
   <section class="pt-14 sm:pt-20 pb-10 sm:pb-14 grid lg:grid-cols-[1fr_auto] items-end gap-4">
     <div>
-      <h1 class="font-display uppercase font-black leading-[0.9] tracking-tight text-6xl sm:text-7xl xl:text-8xl">The weight<br>of destiny</h1>
-      <p class="mt-6 max-w-xl text-base sm:text-lg text-chalk/70 leading-relaxed">Newton's second law explains why a loaded car takes longer to stop than an empty one: the same brakes have to overcome more mass. Hit the brakes on both from the same speed and watch how much extra road the loaded car eats up.</p>
-    </div>
+      <h1 class="font-display uppercase font-black leading-[0.9] tracking-tight text-6xl sm:text-7xl xl:text-8xl">THE LAW<br>OF ACCELERATION</h1>
+      <p class="mt-6 max-w-xl text-base sm:text-lg text-chalk/70 leading-relaxed">Newton's second law explains why a loaded car takes longer to stop than an empty one because the same brakes have to overcome more mass. Hit the brakes on both from the same speed and watch how much extra road the loaded car eats up.</p>
+    </div> 
     <div class="hidden lg:block select-none pointer-events-none">
       <span class="font-display font-black text-[13rem] xl:text-[16rem] leading-none text-chalk/[0.05]">2</span>
     </div>
@@ -178,7 +178,7 @@
         </div>
       </div>
 
-      <div id="readout" role="status" aria-live="polite" class="text-sm sm:text-base text-chalk/70 leading-relaxed border-l-2 border-hazard pl-4 py-1 min-h-[3rem]">Both cars start at the same speed. Hit the brakes and see how much farther the loaded car needs to stop.</div>
+      <div id="readout" role="status" aria-live="polite" class="text-sm sm:text-base text-chalk/70 leading-relaxed border-l-2 border-hazard pl-4 py-1 min-h-[3rem]">Both cars start at the same speed. Hit the brakes and see how much farther the heavier car needs to stop.</div>
     </div>
 
     <div class="space-y-5">
@@ -224,7 +224,7 @@
       <svg width="34" height="34" viewBox="0 0 24 24" fill="none" class="text-safe shrink-0 mt-0.5">
         <path d="M4 17h1.5l1-4h11l1 4H20M6.5 13l1.3-4.5A2 2 0 0 1 9.7 7h4.6a2 2 0 0 1 1.9 1.5L17.5 13M7 17v2M17 17v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
-      <p class="text-sm sm:text-base text-chalk/80 leading-relaxed">This isn't just a physics trick. <strong class="text-chalk">A fully loaded semi-truck needs roughly twice the stopping distance of a car at highway speed</strong> — about 525 feet versus 300 feet from 65 mph, according to the Federal Motor Carrier Safety Administration. Give loaded and heavy vehicles extra following room.</p>
+      <p class="text-sm sm:text-base text-chalk/80 leading-relaxed">This isn't just a physics trick. <strong class="text-chalk">A fully loaded semi-truck needs roughly twice the stopping distance of a car at highway speed</strong> it's about 525 feet versus 300 feet from 65 mph, according to the Federal Motor Carrier Safety Administration. Give loaded and heavy vehicles extra following room.</p>
     </div>
   </section>
 </main>
@@ -373,10 +373,10 @@ function physicsStep(dt){
     if(velE<=0 && velL<=0){
       phase = 'done'; running = false; btnPlay.innerHTML = ICONS.play; setLive('done');
       const ratio = (stopL/Math.max(stopE,0.01)).toFixed(1);
-      readout.innerHTML = `<strong>Same brakes, different mass.</strong> The empty car (${mE} kg) stopped in ${stopE.toFixed(1)} m; the loaded car (${mL} kg) needed ${stopL.toFixed(1)} m — ${ratio}× the distance. More mass means more force is needed to slow down just as fast, which is exactly why loaded cars and trucks need extra following distance.`;
+      readout.innerHTML = `<strong>Same brakes, different mass.</strong> The empty car (${mE} kg) stopped in ${stopE.toFixed(1)} m; the loaded car (${mL} kg) needed ${stopL.toFixed(1)} m — ${ratio}× the distance. More mass means more force is needed to slow down just as fast, which is exactly why loaded cars and trucks need extra distance in between your car and theirs.`;
     } else if(elapsed > 14){
       phase = 'done'; running = false; btnPlay.innerHTML = ICONS.play; setLive('done');
-      readout.innerHTML = `<strong>Still rolling after 14 seconds — let's call it there.</strong> The empty car (${mE} kg) had covered ${posE.toFixed(1)} m; the loaded car (${mL} kg) ${posL.toFixed(1)} m, both still creeping. More brake force or better grip will bring a trial like this to a finish.`;
+      readout.innerHTML = `<strong>Still rolling after 14 seconds, let's call it there.</strong> The empty car (${mE} kg) had covered ${posE.toFixed(1)} m; the loaded car (${mL} kg) ${posL.toFixed(1)} m, both still creeping. More brake force or better grip will bring a trial like this to a finish.`;
     }
   }
   const targetView = Math.max(VIEW_MIN, Math.max(posE, posL, stopE||0, stopL||0) * 1.25);
