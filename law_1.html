@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Proving Ground — Newton's First Law: The Moment of Truth</title>
+<title>NEWTONS FIRST LAW</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
   tailwind.config = {
@@ -92,7 +92,7 @@
         <path d="M14 7v9.5" stroke="#15140f" stroke-width="3" stroke-linecap="round"/>
         <circle cx="14" cy="20.2" r="1.9" fill="#15140f"/>
       </svg>
-      <span class="font-display uppercase tracking-wide text-lg sm:text-xl font-extrabold leading-none">Proving Ground</span>
+      <span class="font-display uppercase tracking-wide text-lg sm:text-xl font-extrabold leading-none">GROUP 2 - ROAD SAFETY</span>
     </a>
     <nav class="flex items-center gap-1 overflow-x-auto" aria-label="Newton's laws">
       <a href="law_1.html" class="nav-tab active" aria-current="page"><span class="nav-num">1</span>Inertia</a>
@@ -107,8 +107,8 @@
 
   <section class="pt-14 sm:pt-20 pb-10 sm:pb-14 grid lg:grid-cols-[1fr_auto] items-end gap-4">
     <div>
-      <h1 class="font-display uppercase font-black leading-[0.9] tracking-tight text-6xl sm:text-7xl xl:text-8xl">The moment<br>of truth</h1>
-      <p class="mt-6 max-w-xl text-base sm:text-lg text-chalk/70 leading-relaxed">Seatbelts exist because of Newton's first law: a body in motion stays in motion until a force stops it. The car stops at the barrier in a fraction of a second. Without a belt, nothing stops the passenger — so they keep travelling at the speed the car was doing.</p>
+      <h1 class="font-display uppercase font-black leading-[0.9] tracking-tight text-6xl sm:text-7xl xl:text-8xl">THE LAW<br>OF INERTIA</h1>
+      <p class="mt-6 max-w-xl text-base sm:text-lg text-chalk/70 leading-relaxed">Seatbelts were made due to Newton's First Law of Motion. </p>
     </div>
     <div class="hidden lg:block select-none pointer-events-none">
       <span class="font-display font-black text-[13rem] xl:text-[16rem] leading-none text-chalk/[0.05]">1</span>
@@ -216,14 +216,14 @@
         <path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6l7-3z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
         <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
-      <p class="text-sm sm:text-base text-chalk/80 leading-relaxed">This isn't just a physics trick. <strong class="text-chalk">Seatbelts cut the risk of death for front-seat passengers by about 45%, and serious injury by 50%</strong>, according to the U.S. National Highway Traffic Safety Administration, which also notes that being completely thrown from a vehicle is almost always deadly. The dummy is standing in for you — buckle up.</p>
+      <p class="text-sm sm:text-base text-chalk/80 leading-relaxed">This isn't just a simulation. <strong class="text-chalk">Seatbelts cut the risk of death for passengers by about 45%, and serious injury by 50%</strong>, this is according to the U.S. National Highway Traffic Safety Administration, which also notes that being completely thrown from a vehicle is almost always deadly. The dummy is taking the risk for you, buckle up.</p>
     </div>
   </section>
 </main>
 
 <footer class="border-t border-line mt-10">
   <div class="mx-auto max-w-7xl px-5 sm:px-8 py-10 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-chalk/40 text-center sm:text-left">
-    <p>Proving Ground — an interactive look at Newton's three laws.</p>
+    <p>TEST - an interactive demonstration of safety through Newton's three laws.</p>
     <a href="law_2.html" class="inline-flex items-center gap-1.5 text-chalk/70 hover:text-hazard font-semibold transition-colors">Next up: the weight of destiny<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a>
   </div>
 </footer>
@@ -406,7 +406,7 @@ function physicsStep(dt){
         phase = 'settling';
         outcome = 'Held';
         thrownDist = 0;
-        readout.innerHTML = `<strong>Buckled — the belt held.</strong> Impact at ${(impactSpeed*3.6).toFixed(0)} km/h. The belt applied the force needed to stop the passenger with the car, instead of letting them keep travelling.`;
+        readout.innerHTML = `<strong>Buckled, the belt held.</strong> Impact at ${(impactSpeed*3.6).toFixed(0)} km/h. The belt applied the force needed to stop the passenger with the car, instead of letting them keep travelling.`;
       }
     }
   } else if(phase === 'ejecting'){
@@ -430,9 +430,9 @@ function physicsStep(dt){
       outcome = 'Ejected';
       const kmh = (impactSpeed*3.6).toFixed(0);
       if(buckled){
-        readout.innerHTML = `<strong>Buckled, but the belt was too weak.</strong> Impact at ${kmh} km/h. It only absorbed ${restraintSlider.value}% of the passenger's motion — they still came out of the seat and travelled ${thrownDist.toFixed(1)} m past the barrier. Try a stronger belt.`;
+        readout.innerHTML = `<strong>Buckled, but the belt was too weak.</strong> Impact at ${kmh} km/h. It only absorbed ${restraintSlider.value}% of the passenger's motion, they still came out of the seat and travelled ${thrownDist.toFixed(1)} m past the barrier. Try a stronger belt.`;
       } else {
-        readout.innerHTML = `<strong>Unbuckled — thrown ${thrownDist.toFixed(1)} m.</strong> Impact at ${kmh} km/h. The car stopped against the barrier in a fraction of a second, but nothing acted on the passenger, so they kept going at ${kmh} km/h. That's inertia, and that's what a seatbelt prevents.`;
+        readout.innerHTML = `<strong>Unbuckled, therefore thrown ${thrownDist.toFixed(1)} m.</strong> Impact at ${kmh} km/h. The car stopped against the barrier in a fraction of a second, but nothing acted on the passenger, so they kept going at ${kmh} km/h. That's inertia, and that's what a seatbelt prevents.`;
       }
       finish();
     } else {
