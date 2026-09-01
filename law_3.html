@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Proving Ground — Newton's Third Law: Equal and Opposite</title>
+<title>NEWTONS THIRD LAW</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
   tailwind.config = {
@@ -94,7 +94,7 @@
         <path d="M14 7v9.5" stroke="#15140f" stroke-width="3" stroke-linecap="round"/>
         <circle cx="14" cy="20.2" r="1.9" fill="#15140f"/>
       </svg>
-      <span class="font-display uppercase tracking-wide text-lg sm:text-xl font-extrabold leading-none">Proving Ground</span>
+      <span class="font-display uppercase tracking-wide text-lg sm:text-xl font-extrabold leading-none">ROAD SAFETY - GROUP 2</span>
     </a>
     <nav class="flex items-center gap-1 overflow-x-auto" aria-label="Newton's laws">
       <a href="law_1.html" class="nav-tab"><span class="nav-num">1</span>Inertia</a>
@@ -109,8 +109,8 @@
 
   <section class="pt-14 sm:pt-20 pb-10 sm:pb-14 grid lg:grid-cols-[1fr_auto] items-end gap-4">
     <div>
-      <h1 class="font-display uppercase font-black leading-[0.9] tracking-tight text-6xl sm:text-7xl xl:text-8xl">Equal and<br>opposite</h1>
-      <p class="mt-6 max-w-xl text-base sm:text-lg text-chalk/70 leading-relaxed">When two vehicles collide, they hit each other with exactly the same force — a small car and a loaded truck included. What isn't equal is what that force does to each of them. Set up a crash and watch the same number appear on both sides, with very different results.</p>
+      <h1 class="font-display uppercase font-black leading-[0.9] tracking-tight text-6xl sm:text-7xl xl:text-8xl">THE LAW<br>OF INTERACTION</h1>
+      <p class="mt-6 max-w-xl text-base sm:text-lg text-chalk/70 leading-relaxed">When two vehicles collide, they hit each other with exactly the same force. This includes small car and a loaded truck. What isn't equal is what that force does to each of them. Set up a crash and watch the same number appear on both sides, with very different results.</p>
     </div>
     <div class="hidden lg:block select-none pointer-events-none">
       <span class="font-display font-black text-[13rem] xl:text-[16rem] leading-none text-chalk/[0.05]">3</span>
@@ -220,15 +220,15 @@
       <svg width="34" height="34" viewBox="0 0 24 24" fill="none" class="text-safe shrink-0 mt-0.5">
         <path d="M4 17h1.5l1-4h11l1 4H20M6.5 13l1.3-4.5A2 2 0 0 1 9.7 7h4.6a2 2 0 0 1 1.9 1.5L17.5 13M7 17v2M17 17v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
-      <p class="text-sm sm:text-base text-chalk/80 leading-relaxed">This isn't just a physics trick. <strong class="text-chalk">Trucks are 20 to 30 times heavier than passenger cars</strong>, according to the Federal Motor Carrier Safety Administration. The collision force is identical on both, but that force has to change the speed of far less mass in the car — which is why the smaller vehicle takes the worse outcome. Keep your distance from heavy vehicles.</p>
+      <p class="text-sm sm:text-base text-chalk/80 leading-relaxed">This isn't just a trick. <strong class="text-chalk">Trucks are 20 to 30 times heavier than passenger cars</strong>, according to the Federal Motor Carrier Safety Administration. The collision force is identical on both, but that force has to change the speed of far less mass in the car. Which is the reason why the smaller vehicle takes the worse outcome. Keep your distance from heavy vehicles.</p>
     </div>
   </section>
 </main>
 
 <footer class="border-t border-line mt-10">
   <div class="mx-auto max-w-7xl px-5 sm:px-8 py-10 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-chalk/40 text-center sm:text-left">
-    <p>Proving Ground — an interactive look at Newton's three laws.</p>
-    <a href="law_1.html" class="inline-flex items-center gap-1.5 text-chalk/70 hover:text-hazard font-semibold transition-colors">Back to the moment of truth<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a>
+    <p>TEST - an interactive proposal at Newton's three laws.</p>
+    <a href="law_1.html" class="inline-flex items-center gap-1.5 text-chalk/70 hover:text-hazard font-semibold transition-colors">Back to the first law<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a>
   </div>
 </footer>
 
@@ -383,9 +383,9 @@ function physicsStep(dt){
       const heavier = mB > mA ? 'the other vehicle' : (mA > mB ? 'your car' : 'neither');
       const ratio = (dvA / Math.max(dvB, 0.01));
       if(Math.abs(mA - mB) < 1) {
-        readout.innerHTML = `<strong>Both vehicles hit each other with ${forceKN.toFixed(0)} kN — exactly the same force.</strong> With equal mass, both change speed by the same amount (${dvA.toFixed(0)} km/h each). Newton's third law always pairs the forces; it's the masses that decide the consequences.`;
+        readout.innerHTML = `<strong>Both vehicles hit each other with ${forceKN.toFixed(0)} kN, they're exactly the same force.</strong> With equal mass, both change speed by the same amount (${dvA.toFixed(0)} km/h each). Newton's third law always pairs the forces together, it's the masses alone that decide the consequences.`;
       } else {
-        readout.innerHTML = `<strong>Both vehicles hit each other with ${forceKN.toFixed(0)} kN — exactly the same force.</strong> But your car's speed changed by ${dvA.toFixed(0)} km/h while theirs changed by only ${dvB.toFixed(0)} km/h — ${ratio.toFixed(1)}× as much. The same force acting on less mass produces a far bigger change, which is what injures people in the lighter vehicle.`;
+        readout.innerHTML = `<strong>Both vehicles hit each other with ${forceKN.toFixed(0)} kN, they're exactly the same force.</strong> But your car's speed changed by ${dvA.toFixed(0)} km/h while theirs changed by only ${dvB.toFixed(0)} km/h, already ${ratio.toFixed(1)}× as much. The same force acting on less mass produces a far bigger change, which is what injures people in the lighter vehicle.`;
       }
     }
   } else if(phase === 'wreck'){
